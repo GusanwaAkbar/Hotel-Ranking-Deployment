@@ -166,10 +166,10 @@ class FastmodelConfig(AppConfig):
 
     data['Score'] = score
 
-    sorted_data = data.sort_values(by=['Score'])
+    sorted_data = data.sort_values(by=['Score'], ascending=False)
 
     final_data = sorted_data.to_json(orient="index")
 
     print(final_data)
-    print('lonte')
+    #print('lonte')
 
