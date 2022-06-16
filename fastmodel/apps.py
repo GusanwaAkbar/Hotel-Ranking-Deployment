@@ -193,21 +193,25 @@ class FastmodelConfig(AppConfig):
 
             c =+1
             score = []
+
+        
             
                 
-        return ((total_score/columns_number)*100  )
+        return (total_score)
 
 
     score = return_predict()
 
     data = preprocessing_output()
-
     data['Score'] = score
-
     sorted_data = data.sort_values(by=['Score'], ascending=False)
 
-    final_data = sorted_data.to_json(orient="index")
+    final_data = sorted_data.to_json(orient="table")
+
+    
+
+
 
     print(score)
-    #print('lonte')
+    print('Doneeeeee')
 

@@ -26,5 +26,5 @@ urlpatterns = [
     path('', views.call.as_view()),
 
     
-    path('call2/', views.call2.as_view())
+    path('call_2/', views.call_2.as_view() , name = 'call_2' )
 ]
