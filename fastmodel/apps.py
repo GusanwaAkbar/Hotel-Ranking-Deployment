@@ -17,10 +17,10 @@ class FastmodelConfig(AppConfig):
     
     MODEL_PATH = Path("model")
     
-    MODEL = MODEL_PATH/'model_weight2.h5'
+    MODEL = MODEL_PATH/'model7.h5'
     
     #default_auto_field = 'django.db.models.BigAutoField'
-    DATA = MODEL_PATH/'hotels3.csv'
+    DATA = MODEL_PATH/'hotels5.csv'
 
 
     df = pd.read_csv(DATA)
@@ -78,13 +78,7 @@ class FastmodelConfig(AppConfig):
                             
         df = df.fillna(15000)
 
-        df.Harga = df['Harga'].str.replace('.','', regex = True)
-        df.Harga = df['Harga'].str.replace(',','.', regex = True)
-        df.Harga = df['Harga'].astype(float).astype(int)
-
-        df.Reviews = df['Reviews'].str.replace('.','', regex = True)
-        df.Reviews = df['Reviews'].str.replace(',','.', regex = True)
-        df.Reviews = df['Reviews'].astype(float).astype(int)
+        df.Harga = df['Harga'].str.replace('.','', regex = True).str.replace(',','.', regex = True).astype(float).astype(int)
 
         c = df.select_dtypes(object).columns
         df[c] = df[c].apply(pd.to_numeric,errors='coerce')
@@ -112,7 +106,7 @@ class FastmodelConfig(AppConfig):
 
     def preprocessing_output():
 
-        data = pd.read_csv('https://storage.googleapis.com/data-hotel/list-hotel/Data%20API.csv')
+        data = pd.read_csv('https://storage.googleapis.com/data-hotel/list-hotel/dataset_output.csv')
 
         return data
 
@@ -133,16 +127,17 @@ class FastmodelConfig(AppConfig):
 
         model = keras.Sequential([
         normalizer,
-        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(regularizer)),
-            layers.Dropout(dropout),
-        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(regularizer)),
-            layers.Dropout(dropout),
-        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(regularizer)),
-            layers.Dropout(dropout),
+        layers.Dense(64, activation='relu', kernel_regularizer=regularizers.l2(regularizer) ),
+        layers.Dropout(dropout),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(regularizer) ),
+        layers.Dropout(dropout),
         layers.Dense(1)
         ])
         
         return model
+
+
+    
 
 
 
@@ -157,7 +152,50 @@ class FastmodelConfig(AppConfig):
 
         return predict
 
+    def count_references_score(columns,df = df):
+    
+        places_columns = ['Fast Food', 'Shop & Gifts', 'Business',
+        'Transportation Hub', 'Casual Dining', 'Nightlife', 'Park & Zoo',
+        'Public Service', 'Arts & Sciences', 'Fine Dining', 'Sport',
+        'Quick Bites', 'Education', 'Street Food', 'Activity & Games', 'Cafe',
+        'Entertainment', 'Food Court', 'Sight & Landmark']
+        
+        columns_number = len(columns)
+        
+        c = 0
+        score = []
+        total_score = []
+        
+        for x in columns: 
+            
+            if x in places_columns:
+                
+                for j in df[x]:
+                    
+                    places_value = 1-(j/15000) 
+                    score.append(places_value)
+                    
+                if c == 0:
+                    total_score = score
+                else:
+                    total_score = np.add(score,total_score)
+            
+            else:
+                max_count = df[x].max()
+                
+                for y in df[x]:
+                    score.append(y/max_count)
 
+                if c == 0:
+                    total_score = score
+                else:
+                    total_score = np.add(score,total_score)
+
+            c =+1
+            score = []
+            
+                
+        return ((total_score/columns_number)*100  )
 
 
     score = return_predict()
@@ -170,6 +208,6 @@ class FastmodelConfig(AppConfig):
 
     final_data = sorted_data.to_json(orient="index")
 
-    print(final_data)
+    print(score)
     #print('lonte')
 
